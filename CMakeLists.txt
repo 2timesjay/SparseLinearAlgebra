@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.6)
+project(CPPSparseLinearAlgebra)
+
+set(CMAKE_CXX_STANDARD 11)
+
+# Locate GTest
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+set(SOURCE_FILES main.cpp SparseVector.h)
+add_executable(CPPSparseLinearAlgebra ${SOURCE_FILES})
+
+set(SOURCE_FILES SparseVector.h SparseVectorTest.cpp)
+add_executable(runTests ${SOURCE_FILES})
+target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
+
+set(SOURCE_FILES sqrt.cpp sqrttest.cpp)
+add_executable(runSqrtTests ${SOURCE_FILES})
+target_link_libraries(runSqrtTests ${GTEST_LIBRARIES} pthread)
