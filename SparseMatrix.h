@@ -23,7 +23,7 @@ public:
 
     SparseMatrix<T> ();
     SparseMatrix<T> (int r, int c);
-    T get(int r, int c);
+    T* get(int r, int c);
     void add(int r, int c, T val);
     void add_row(int r, SparseVector<T> v);
     SparseMatrix<T> Transpose();
@@ -74,10 +74,9 @@ void SparseMatrix<T>::add(int r, int c, T val){
 
 template <class T>
 inline
-T SparseMatrix<T>::get(int r, int c){
+T* SparseMatrix<T>::get(int r, int c){
     SparseVector<T> *row = row_list.get(r);
-    T val = *(row->get(c));
-    return val;
+    return row->get(c);
 }
 
 template <class T>

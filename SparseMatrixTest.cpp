@@ -28,10 +28,10 @@ TEST(Construct, AddElements){
     m.add(1, 1, 6);
     m.add(1, 2, 7);
 
-    ASSERT_EQ(4, m.get(0, 0));
-    ASSERT_EQ(5, m.get(0, 2));
-    ASSERT_EQ(6, m.get(1, 1));
-    ASSERT_EQ(7, m.get(1, 2));
+    ASSERT_EQ(4, *m.get(0, 0));
+    ASSERT_EQ(5, *m.get(0, 2));
+    ASSERT_EQ(6, *m.get(1, 1));
+    ASSERT_EQ(7, *m.get(1, 2));
 }
 
 

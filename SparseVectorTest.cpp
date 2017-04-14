@@ -60,9 +60,9 @@ TEST(Get, PresentElement) {
     c.push_back(11, 4);
     c.push_back(24, 3);
 
-    ASSERT_EQ(5, c.get(3));
-    ASSERT_EQ(4, c.get(11));
-    ASSERT_EQ(3, c.get(24));
+    ASSERT_EQ(5, *c.get(3));
+    ASSERT_EQ(4, *c.get(11));
+    ASSERT_EQ(3, *c.get(24));
 }
 
 TEST(Get, NonPresentElement) {
@@ -71,8 +71,8 @@ TEST(Get, NonPresentElement) {
     c.push_back(11, 4);
     c.push_back(24, 3);
 
-    ASSERT_EQ(NULL, c.get(-1));
-    ASSERT_EQ(NULL, c.get(2));
+    ASSERT_EQ(NULL, *c.get(-1));
+    ASSERT_EQ(NULL, *c.get(2));
 }
 
 int main(int argc, char **argv) {
