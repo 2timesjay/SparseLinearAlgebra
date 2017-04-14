@@ -22,7 +22,8 @@ public:
     int size;
     list<IdVal<T>> iv_list;
     SparseVector<T> (int size);
-    SparseVector<T> operator+(SparseVector spv);
+    SparseVector<T> operator+(SparseVector other);
+    SparseVector<T> operator&&(SparseVector other);
     void push_back(int id, T val);
 };
 
@@ -30,6 +31,12 @@ template <class T>
 inline
 SparseVector<T>::SparseVector(int input_size){
     size = input_size;
+}
+
+template <class T>
+inline
+SparseVector<T> operator+(SparseVector<T> a, SparseVector<T> b) {
+    return a + b;
 }
 
 template <class T>
@@ -72,6 +79,41 @@ SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
 //    for (IVIterator<T> merged_it=merged_iv_list.begin(); merged_it != merged_iv_list.end(); ++merged_it) {
 //        cout << (*merged_it).first << " " << (*merged_it).second << endl;
 //    }
+
+    SparseVector<T> merged = SparseVector<T>(size + other.size);
+    merged.iv_list = merged_iv_list;
+    return merged;
+}
+
+/// Should Serve as basis for other operations: && type ops and || type ops with reductions on elements.
+/// \tparam T
+/// \param other
+/// \return
+template <class T>
+inline
+SparseVector<T> SparseVector<T>::operator&&(SparseVector<T> other) {
+    list<IdVal<T>> merged_iv_list;
+    IVIterator<T> iv_it = iv_list.begin();
+    IVIterator<T> other_iv_it = other.iv_list.begin();
+    int limiter = 0;
+    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end() and limiter < 100){
+        ++limiter;
+        int id = (*iv_it).first;
+        int other_id = (*other_iv_it).first;
+        if (id < other_id){
+            ++iv_it;
+        }
+        else if (id > other_id) {
+            ++other_iv_it;
+        }
+        else if (id == other_id) {
+            int val = (*iv_it).second;
+            int other_val = (*other_iv_it).second;
+            merged_iv_list.push_back(IdVal<T>(id, val + other_val));
+            ++iv_it;
+            ++other_iv_it;
+        }
+    }
 
     SparseVector<T> merged = SparseVector<T>(size + other.size);
     merged.iv_list = merged_iv_list;

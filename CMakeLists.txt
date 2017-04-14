@@ -13,7 +13,3 @@ add_executable(CPPSparseLinearAlgebra ${SOURCE_FILES})
 set(SOURCE_FILES SparseVector.h SparseVectorTest.cpp)
 add_executable(runTests ${SOURCE_FILES})
 target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
-
-set(SOURCE_FILES sqrt.cpp sqrttest.cpp)
-add_executable(runSqrtTests ${SOURCE_FILES})
-target_link_libraries(runSqrtTests ${GTEST_LIBRARIES} pthread)
