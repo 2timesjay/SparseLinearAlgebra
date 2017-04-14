@@ -2,8 +2,8 @@
 // Created by jacob on 3/26/17.
 //
 
-#ifndef CPPSPEEDY_ARRAYOPS_H
-#define CPPSPEEDY_ARRAYOPS_H
+#ifndef CPPSPLA_ARRAYOPS_H
+#define CPPSPLA_ARRAYOPS_H
 
 #include <iostream>
 #include <list>
@@ -11,14 +11,16 @@
 using namespace std;
 
 template <class T>
-using IdValue = pair<int, T>;
+using IdVal = pair<int, T>;
+
+template <class T>
+using IVIterator = typename list<IdVal<T>>::iterator;
 
 template <class T>
 class SparseVector {
 public:
     int size;
-    list<int> id_list;
-    list<T> val_list;
+    list<IdVal<T>> iv_list;
     SparseVector<T> (int size);
     SparseVector<T> operator+(SparseVector spv);
     void push_back(int id, T val);
@@ -33,54 +35,53 @@ SparseVector<T>::SparseVector(int input_size){
 template <class T>
 inline
 SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
-    list<int> merged_id_list;
-    list<T> merged_val_list;
+    list<IdVal<T>> merged_iv_list;
+    IVIterator<T> iv_it = iv_list.begin();
+    IVIterator<T> other_iv_it = other.iv_list.begin();
+    int limiter = 0;
+    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end() and limiter < 100){
+        ++limiter;
+        int id = (*iv_it).first;
+        int other_id = (*other_iv_it).first;
+        if (id < other_id){
+            merged_iv_list.push_back(*iv_it);
+            ++iv_it;
+        }
+        else if (id > other_id) {
+            merged_iv_list.push_back(*other_iv_it);
+            ++other_iv_it;
+        }
+        else if (id == other_id) {
+            int val = (*iv_it).second;
+            int other_val = (*other_iv_it).second;
+            merged_iv_list.push_back(IdVal<T>(id, val + other_val));
+            ++iv_it;
+            ++other_iv_it;
+        }
+    }
+    //Ensure that the longer iv_list has its remaining elements added.
+    while (iv_it != iv_list.end()) {
+        merged_iv_list.push_back(*iv_it);
+        ++iv_it;
+    }
+    while (other_iv_it != other.iv_list.end()) {
+        merged_iv_list.push_back(*other_iv_it);
+        ++other_iv_it;
+    }
 
-    list<int> other_id_list = other.id_list;
-    list<int>::iterator other_it = other_id_list.begin();
-    list<int>::iterator val_it = val_list.begin();
-    list<int>::iterator other_val_it = other.val_list.begin();
-    for (list<int>::iterator it=id_list.begin(); it != id_list.end(); ++it) {
-        while (*other_it < *it) {
-            merged_id_list.push_back(*other_it);
-            ++other_it;
-            merged_val_list.push_back(*other_val_it);
-            ++other_val_it;
-        }
-        if (*other_it == *it) {
-            merged_id_list.push_back(*other_it);
-            ++other_it;
-            merged_val_list.push_back(*val_it + *other_val_it);
-            ++val_it;
-            ++other_val_it;
-        }
-        else {
-            merged_id_list.push_back(*it);
-            merged_val_list.push_back(*val_it);
-            ++val_it;
-        }
-    }
-    while (other_it != other_id_list.end()) {
-        merged_id_list.push_back(*other_it);
-        ++other_it;
-        merged_val_list.push_back(*other_val_it);
-        ++other_val_it;
-    }
+//    for (IVIterator<T> merged_it=merged_iv_list.begin(); merged_it != merged_iv_list.end(); ++merged_it) {
+//        cout << (*merged_it).first << " " << (*merged_it).second << endl;
+//    }
 
     SparseVector<T> merged = SparseVector<T>(size + other.size);
-    list<int>::iterator merged_val_it=merged_val_list.begin();
-    for (list<int>::iterator merged_it=merged_id_list.begin(); merged_it != merged_id_list.end(); ++merged_it) {
-        merged.push_back(*merged_it, *merged_val_it);
-        ++merged_val_it;
-    }
+    merged.iv_list = merged_iv_list;
     return merged;
 }
 
 template <class T>
 inline
 void SparseVector<T>::push_back(int id, T val) {
-    id_list.push_back(id);
-    val_list.push_back(val);
+    iv_list.push_back(IdVal<T>(id, val));
 }
 
-#endif //CPPSPEEDY_ARRAYOPS_H
+#endif //CPPSPLA_ARRAYOPS_H
