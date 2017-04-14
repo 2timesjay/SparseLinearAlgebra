@@ -51,6 +51,15 @@ template <class T>
 inline
 SparseMatrix<T> SparseMatrix<T>::Transpose() {
     SparseMatrix<T> mt = SparseMatrix<T>(cols, rows);
+    for (IVIterator<SparseVector<T>> row_it=row_list.iv_list.begin(); row_it != row_list.iv_list.end(); ++row_it) {
+        int r = row_it->first;
+        SparseVector<T> row = row_it->second;
+        for (IVIterator<T> it=row.iv_list.begin(); it != row.iv_list.end(); ++it) {
+            int c = it->first;
+            T val = it->second;
+            mt.add(c, r, val);
+        }
+    }
     return mt;
 }
 
@@ -66,10 +75,6 @@ void SparseMatrix<T>::add(int r, int c, T val){
     row = row_list.get(r);
     ++size;
     row->push_back(c, val);
-//    cout << r << " " << c << " " << val << endl;
-//    row->print_string();
-//    row_list.get(r)->print_string();
-//    cout << " --- " << endl;
 }
 
 template <class T>
