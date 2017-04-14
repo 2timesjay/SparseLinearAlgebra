@@ -11,5 +11,9 @@ set(SOURCE_FILES main.cpp SparseVector.h)
 add_executable(CPPSparseLinearAlgebra ${SOURCE_FILES})
 
 set(SOURCE_FILES SparseVector.h SparseVectorTest.cpp)
-add_executable(runTests ${SOURCE_FILES})
-target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
+add_executable(runTestsVector ${SOURCE_FILES})
+target_link_libraries(runTestsVector ${GTEST_LIBRARIES} pthread)
+
+set(SOURCE_FILES SparseVector.h SparseMatrix.h SparseMatrixTest.cpp)
+add_executable(runTestsMatrix ${SOURCE_FILES})
+target_link_libraries(runTestsMatrix ${GTEST_LIBRARIES} pthread)

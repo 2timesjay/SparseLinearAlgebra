@@ -21,11 +21,22 @@ class SparseVector {
 public:
     int size;
     list<IdVal<T>> iv_list;
+    SparseVector<T> ();
     SparseVector<T> (int size);
     SparseVector<T> operator+(SparseVector other);
     SparseVector<T> operator&&(SparseVector other);
+    T* get(int id);
+    bool has(int id);
+    void print_string();
     void push_back(int id, T val);
 };
+
+template <class T>
+inline
+SparseVector<T>::SparseVector(){
+    size = 0;
+}
+
 
 template <class T>
 inline
@@ -45,9 +56,7 @@ SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
     list<IdVal<T>> merged_iv_list;
     IVIterator<T> iv_it = iv_list.begin();
     IVIterator<T> other_iv_it = other.iv_list.begin();
-    int limiter = 0;
-    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end() and limiter < 100){
-        ++limiter;
+    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end()) {
         int id = (*iv_it).first;
         int other_id = (*other_iv_it).first;
         if (id < other_id){
@@ -76,10 +85,6 @@ SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
         ++other_iv_it;
     }
 
-//    for (IVIterator<T> merged_it=merged_iv_list.begin(); merged_it != merged_iv_list.end(); ++merged_it) {
-//        cout << (*merged_it).first << " " << (*merged_it).second << endl;
-//    }
-
     SparseVector<T> merged = SparseVector<T>(size + other.size);
     merged.iv_list = merged_iv_list;
     return merged;
@@ -95,9 +100,7 @@ SparseVector<T> SparseVector<T>::operator&&(SparseVector<T> other) {
     list<IdVal<T>> merged_iv_list;
     IVIterator<T> iv_it = iv_list.begin();
     IVIterator<T> other_iv_it = other.iv_list.begin();
-    int limiter = 0;
-    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end() and limiter < 100){
-        ++limiter;
+    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end()){
         int id = (*iv_it).first;
         int other_id = (*other_iv_it).first;
         if (id < other_id){
@@ -118,6 +121,37 @@ SparseVector<T> SparseVector<T>::operator&&(SparseVector<T> other) {
     SparseVector<T> merged = SparseVector<T>(size + other.size);
     merged.iv_list = merged_iv_list;
     return merged;
+}
+
+template <class T>
+inline
+T* SparseVector<T>::get(int id) {
+    for (IVIterator<T> it=iv_list.begin(); it != iv_list.end(); ++it) {
+        if ((*it).first == id){
+            return &(it->second);
+        }
+    }
+}
+
+template <class T>
+inline
+bool SparseVector<T>::has(int id) {
+    for (IVIterator<T> it=iv_list.begin(); it != iv_list.end(); ++it) {
+        if ((*it).first == id){
+            return true;
+        }
+    }
+    return false;
+}
+
+template <class T>
+inline
+void SparseVector<T>::print_string() {
+    cout << "Printing SPV ";
+    for (IVIterator<T> it=iv_list.begin(); it != iv_list.end(); ++it) {
+        cout << (*it).first << " " << (*it).second << " ";
+    }
+    cout << endl;
 }
 
 template <class T>

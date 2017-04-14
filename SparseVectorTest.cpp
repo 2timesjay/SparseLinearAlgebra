@@ -54,6 +54,27 @@ TEST(Add, SameIdPresent) {
     ASSERT_EQ(1, (*iv_it).second);
 }
 
+TEST(Get, PresentElement) {
+    SparseVector<int> c = SparseVector<int>(52);
+    c.push_back(3, 5);
+    c.push_back(11, 4);
+    c.push_back(24, 3);
+
+    ASSERT_EQ(5, c.get(3));
+    ASSERT_EQ(4, c.get(11));
+    ASSERT_EQ(3, c.get(24));
+}
+
+TEST(Get, NonPresentElement) {
+    SparseVector<int> c = SparseVector<int>(52);
+    c.push_back(3, 5);
+    c.push_back(11, 4);
+    c.push_back(24, 3);
+
+    ASSERT_EQ(NULL, c.get(-1));
+    ASSERT_EQ(NULL, c.get(2));
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
