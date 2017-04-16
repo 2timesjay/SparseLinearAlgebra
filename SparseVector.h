@@ -19,6 +19,7 @@ T Add(T a, T b) {
 template <class T>
 inline
 T Multiply(T a, T b) {
+    cout << a << " * " << b << " = " << a * b << endl;
     return a * b;
 }
 
@@ -36,6 +37,7 @@ public:
     SparseVector<T> ();
     SparseVector<T> (int size);
     SparseVector<T> operator+(SparseVector other);
+    SparseVector<T> operator*(SparseVector other);
     SparseVector<T> GenMult(SparseVector other, T (*mult)(T, T));
     SparseVector<T> GenAdd(SparseVector other, T (*add)(T, T));
     T Reduce(T (*reducef)(T, T), T zero);
@@ -67,8 +69,20 @@ SparseVector<T> operator+(SparseVector<T> a, SparseVector<T> b) {
 
 template <class T>
 inline
+SparseVector<T> operator*(SparseVector<T> a, SparseVector<T> b) {
+    return a * b;
+}
+
+template <class T>
+inline
 SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
     return GenAdd(other, &Add);
+}
+
+template <class T>
+inline
+SparseVector<T> SparseVector<T>::operator*(SparseVector<T> other) {
+    return GenMult(other, &Multiply);
 }
 
 /// Performs Generalized multiplication in the sense of a semiring.
@@ -76,12 +90,16 @@ SparseVector<T> SparseVector<T>::operator+(SparseVector<T> other) {
 template <class T>
 inline
 SparseVector<T> SparseVector<T>::GenMult(SparseVector<T> other, T (*mult)(T, T)) {
+    cout << "Mult Attempt: " << endl;
     list<IdVal<T>> merged_iv_list;
     IVIterator<T> iv_it = iv_list.begin();
     IVIterator<T> other_iv_it = other.iv_list.begin();
-    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end()){
+    int limiter = 5;
+    while (iv_it != iv_list.end() and other_iv_it != other.iv_list.end() and limiter >= 0){
+        --limiter;
         int id = (*iv_it).first;
         int other_id = (*other_iv_it).first;
+        cout << "Mult: " << id << " " << other_id << endl;
         if (id < other_id){
             ++iv_it;
         }
@@ -91,7 +109,13 @@ SparseVector<T> SparseVector<T>::GenMult(SparseVector<T> other, T (*mult)(T, T))
         else if (id == other_id) {
             T val = (*iv_it).second;
             T other_val = (*other_iv_it).second;
-            merged_iv_list.push_back(IdVal<T>(id, (*mult)(val, other_val)));
+            cout << "PREX: " << id << " " << other_id << endl;
+//            T merged_val = (*mult)(val, other_val);
+            T merged_val = val * other_val;
+            cout << "X: " << id << " " << other_id << endl;
+            T alternate_merged_val = (*mult)(val, other_val);
+            merged_iv_list.push_back(IdVal<T>(id, merged_val));
+            cout << "POSX: " << id << " " << other_id << endl;
             ++iv_it;
             ++other_iv_it;
         }

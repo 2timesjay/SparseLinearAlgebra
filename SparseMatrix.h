@@ -27,8 +27,8 @@ public:
     void add(int r, int c, T val);
     void add_row(int r, SparseVector<T> v);
     SparseMatrix<T> Transpose();
-    SparseMatrix<T> GenAdd(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>));
-    SparseMatrix<T> GenMult(SparseMatrix<T> other, SparseVector<T> (*mult)(SparseVector<T>, SparseVector<T>));
+    SparseMatrix<T> GenAddMat(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>));
+    SparseMatrix<T> GenMultMat(SparseMatrix<T> other, T (*mult)(T, T));
 };
 
 template <class T>
@@ -94,7 +94,7 @@ void SparseMatrix<T>::add(int r, int c, T val){
 // TODO: Rewrite to use just T, T -> T lambdas and intelligently create the lambda for vector addition/multiplication.
 template <class T>
 inline
-SparseMatrix<T> SparseMatrix<T>::GenAdd(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>)){
+SparseMatrix<T> SparseMatrix<T>::GenAddMat(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>)){
     SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
     mt.row_list = row_list.GenAdd(other.row_list, *add);
     return mt;
@@ -102,9 +102,32 @@ SparseMatrix<T> SparseMatrix<T>::GenAdd(SparseMatrix<T> other, SparseVector<T> (
 
 template <class T>
 inline
-SparseMatrix<T> SparseMatrix<T>::GenMult(SparseMatrix<T> other, SparseVector<T> (*mult)(SparseVector<T>, SparseVector<T>)){
+SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, T (*mult)(T, T)){
+    cout << "Elem Mult: " << endl;
     SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
-    mt.row_list = row_list.GenMult(other.row_list, *mult);
+//    mt.row_list = row_list.GenMult(other.row_list,
+//                                   [](SparseVector<T> a, SparseVector<T> b)->SparseVector<T>{
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       cout << a.size << endl;
+//                                       cout << b.size << endl;
+//                                       cout << *a.get(0) * *b.get(0) << endl;
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       SparseVector<T> c = MultiplyElements(a, b);
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       cout << *c.get(0) << endl;
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       return a.GenMult(b, &Multiply);
+//                                   });
+
+//    auto fptr = [](SparseVector<T> a, SparseVector<T> b) {
+//        cout << "Sparse Vector Lambda" << endl;
+//        return a.GenMult(b, [](T ea, T eb) {return ea * eb;} );
+//    };
+//    mt.row_list = row_list.GenMult(other.row_list,
+//                                   fptr);
+
+    mt.row_list = row_list.GenMult(other.row_list,
+                                   &MultiplyElements);
     return mt;
 }
 
