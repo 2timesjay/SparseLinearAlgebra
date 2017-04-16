@@ -29,10 +29,6 @@ TEST(Add, DisjointIdLists) {
 }
 
 TEST(Add, SameIdPresent) {
-    SparseVector<int> a(1);
-    SparseVector<int> b = SparseVector<int>(33);
-    SparseVector<int> summed_spv = a + b;
-
     SparseVector<int> c = SparseVector<int>(52);
     c.push_back(3, 5);
     c.push_back(11, 4);
@@ -90,6 +86,38 @@ TEST(Get, NonPresentElement) {
     // Failing right now - returns random memory.
     // ASSERT_EQ(NULL, *c.get(-1));
     // ASSERT_EQ(NULL, *c.get(2));
+}
+
+TEST(Reduce, Simple) {
+    SparseVector<int> c = SparseVector<int>(52);
+    c.push_back(3, 5);
+    c.push_back(11, 4);
+    c.push_back(24, 3);
+
+    int result = c.Reduce(&Add, 0);
+    ASSERT_EQ(12, result);
+}
+
+TEST(GenDot, Simple){
+    SparseVector<int> c = SparseVector<int>(52);
+    c.push_back(3, 5);
+    c.push_back(11, 4);
+    c.push_back(24, 3);
+
+    SparseVector<int> d = SparseVector<int>(52);
+    d.push_back(11, 2);
+    d.push_back(30, 1);
+
+    // Add-Mult Product
+    int amresult = c.GenDot(d, &Multiply, &Add, 0);
+    ASSERT_EQ(8, amresult);
+
+    // Min-Plus semiring dot product
+    int mpresult = c.GenDot(d,
+                            [](int a, int b) { return a + b; },
+                            [](int a, int b) { return min(a, b); },
+                            INT32_MAX);
+    ASSERT_EQ(6, mpresult);
 }
 
 int main(int argc, char **argv) {

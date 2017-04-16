@@ -27,7 +27,21 @@ public:
     void add(int r, int c, T val);
     void add_row(int r, SparseVector<T> v);
     SparseMatrix<T> Transpose();
+    SparseMatrix<T> GenAdd(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>));
+    SparseMatrix<T> GenMult(SparseMatrix<T> other, SparseVector<T> (*mult)(SparseVector<T>, SparseVector<T>));
 };
+
+template <class T>
+inline
+SparseVector<T> AddElements(SparseVector<T> a, SparseVector<T> b) {
+    return a.GenAdd(b, &Add);
+}
+
+template <class T>
+inline
+SparseVector<T> MultiplyElements(SparseVector<T> a, SparseVector<T> b) {
+    return a.GenMult(b, &Multiply);
+}
 
 template <class T>
 inline
@@ -75,6 +89,23 @@ void SparseMatrix<T>::add(int r, int c, T val){
     row = row_list.get(r);
     ++size;
     row->push_back(c, val);
+}
+
+// TODO: Rewrite to use just T, T -> T lambdas and intelligently create the lambda for vector addition/multiplication.
+template <class T>
+inline
+SparseMatrix<T> SparseMatrix<T>::GenAdd(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>)){
+    SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
+    mt.row_list = row_list.GenAdd(other.row_list, *add);
+    return mt;
+}
+
+template <class T>
+inline
+SparseMatrix<T> SparseMatrix<T>::GenMult(SparseMatrix<T> other, SparseVector<T> (*mult)(SparseVector<T>, SparseVector<T>)){
+    SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
+    mt.row_list = row_list.GenMult(other.row_list, *mult);
+    return mt;
 }
 
 template <class T>

@@ -38,6 +38,8 @@ public:
     SparseVector<T> operator+(SparseVector other);
     SparseVector<T> GenMult(SparseVector other, T (*mult)(T, T));
     SparseVector<T> GenAdd(SparseVector other, T (*add)(T, T));
+    T Reduce(T (*reducef)(T, T), T zero);
+    T GenDot(SparseVector other, T (*elemf)(T, T), T (*reducef)(T, T), T zero);
     T* get(int id);
     bool has(int id);
     void print_string();
@@ -87,8 +89,8 @@ SparseVector<T> SparseVector<T>::GenMult(SparseVector<T> other, T (*mult)(T, T))
             ++other_iv_it;
         }
         else if (id == other_id) {
-            int val = (*iv_it).second;
-            int other_val = (*other_iv_it).second;
+            T val = (*iv_it).second;
+            T other_val = (*other_iv_it).second;
             merged_iv_list.push_back(IdVal<T>(id, (*mult)(val, other_val)));
             ++iv_it;
             ++other_iv_it;
@@ -120,8 +122,8 @@ SparseVector<T> SparseVector<T>::GenAdd(SparseVector<T> other, T (*add)(T, T)) {
             ++other_iv_it;
         }
         else if (id == other_id) {
-            int val = (*iv_it).second;
-            int other_val = (*other_iv_it).second;
+            T val = (*iv_it).second;
+            T other_val = (*other_iv_it).second;
             merged_iv_list.push_back(IdVal<T>(id, (*add)(val, other_val)));
             ++iv_it;
             ++other_iv_it;
@@ -140,6 +142,25 @@ SparseVector<T> SparseVector<T>::GenAdd(SparseVector<T> other, T (*add)(T, T)) {
     SparseVector<T> merged = SparseVector<T>(size + other.size);
     merged.iv_list = merged_iv_list;
     return merged;
+}
+
+template <class T>
+inline
+T SparseVector<T>::Reduce(T (*reducef)(T, T), T zero) {
+    T accum = zero;
+    for (IVIterator<T> it=iv_list.begin(); it != iv_list.end(); ++it) {
+        accum = reducef(accum, it->second);
+    }
+    return accum;
+}
+
+/// Performs Generalized Addition in the sense of a semiring.
+/// Set of ids is an OR of the two. Where both are present, apply (*add).
+template <class T>
+inline
+T SparseVector<T>::GenDot(SparseVector<T> other, T (*elemf)(T, T), T (*reducef)(T, T), T zero) {
+    SparseVector<T> temp = this->GenMult(other, elemf);
+    return temp.Reduce(reducef, zero);
 }
 
 template <class T>

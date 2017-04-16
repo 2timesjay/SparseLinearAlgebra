@@ -49,6 +49,48 @@ TEST(Transpose, Simple){
     ASSERT_EQ(7, *m.get(1, 2));
 }
 
+TEST(GenAdd, Simple){
+    SparseMatrix<int> m1 = SparseMatrix<int>(2, 3);
+    m1.add(0, 0, 4);
+    m1.add(0, 2, 5);
+    m1.add(1, 1, 6);
+    m1.add(1, 2, 7);
+
+    SparseMatrix<int> m2 = SparseMatrix<int>(2, 3);
+    m2.add(0, 0, 10);
+    m2.add(0, 2, 10);
+    m2.add(1, 0, 10);
+    m2.add(1, 2, 10);
+
+    SparseMatrix<int> m3 = m1.GenAdd(m2, &AddElements);
+
+    ASSERT_EQ(14, *m3.get(0, 0));
+    ASSERT_EQ(15, *m3.get(0, 2));
+    ASSERT_EQ(10, *m3.get(1, 0));
+    ASSERT_EQ(6, *m3.get(1, 1));
+    ASSERT_EQ(17, *m3.get(1, 2));
+}
+
+TEST(GenMult, Simple){
+    SparseMatrix<int> m1 = SparseMatrix<int>(2, 3);
+    m1.add(0, 0, 4);
+    m1.add(0, 2, 5);
+    m1.add(1, 1, 6);
+    m1.add(1, 2, 7);
+
+    SparseMatrix<int> m2 = SparseMatrix<int>(2, 3);
+    m2.add(0, 0, 10);
+    m2.add(0, 2, 10);
+    m2.add(1, 0, 10);
+    m2.add(1, 2, 10);
+
+    SparseMatrix<int> m3 = m1.GenMult(m2, &MultiplyElements);
+
+    ASSERT_EQ(40, *m3.get(0, 0));
+    ASSERT_EQ(50, *m3.get(0, 2));
+    ASSERT_EQ(70, *m3.get(1, 2));
+}
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
