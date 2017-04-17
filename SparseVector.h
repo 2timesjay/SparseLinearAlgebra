@@ -18,7 +18,7 @@ T Add(T a, T b) {
 
 template <class T>
 inline
-T Multiply(T a, T b) {
+T Multiply(T& a, T& b) {
     cout << a << " * " << b << " = " << a * b << endl;
     return a * b;
 }
@@ -38,7 +38,7 @@ public:
     SparseVector<T> (int size);
     SparseVector<T> operator+(SparseVector other);
     SparseVector<T> operator*(SparseVector other);
-    SparseVector<T> GenMult(SparseVector other, T (*mult)(T, T));
+    SparseVector<T> GenMult(SparseVector other, T (*mult)(T&, T&));
     SparseVector<T> GenAdd(SparseVector other, T (*add)(T, T));
     T Reduce(T (*reducef)(T, T), T zero);
     T GenDot(SparseVector other, T (*elemf)(T, T), T (*reducef)(T, T), T zero);
@@ -69,7 +69,7 @@ SparseVector<T> operator+(SparseVector<T> a, SparseVector<T> b) {
 
 template <class T>
 inline
-SparseVector<T> operator*(SparseVector<T> a, SparseVector<T> b) {
+SparseVector<T> operator*(SparseVector<T>& a, SparseVector<T>& b) {
     return a * b;
 }
 
@@ -89,7 +89,7 @@ SparseVector<T> SparseVector<T>::operator*(SparseVector<T> other) {
 /// Set of ids is an AND of the two. Where both are present, apply (*add).
 template <class T>
 inline
-SparseVector<T> SparseVector<T>::GenMult(SparseVector<T> other, T (*mult)(T, T)) {
+SparseVector<T> SparseVector<T>::GenMult(SparseVector<T> other, T (*mult)(T&, T&)) {
     cout << "Mult Attempt: " << endl;
     list<IdVal<T>> merged_iv_list;
     IVIterator<T> iv_it = iv_list.begin();
