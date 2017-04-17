@@ -49,7 +49,7 @@ TEST(Transpose, Simple){
     ASSERT_EQ(7, *m.get(1, 2));
 }
 
-TEST(GenAdd, Simple){
+TEST(GenAddMat, Simple){
     SparseMatrix<int> m1 = SparseMatrix<int>(2, 3);
     m1.add(0, 0, 4);
     m1.add(0, 2, 5);
@@ -71,7 +71,7 @@ TEST(GenAdd, Simple){
     ASSERT_EQ(17, *m3.get(1, 2));
 }
 
-TEST(GenMult, Simple){
+TEST(GenMultMat, Simple){
     SparseMatrix<int> m1 = SparseMatrix<int>(2, 3);
     m1.add(0, 0, 4);
     m1.add(0, 2, 5);
@@ -91,6 +91,25 @@ TEST(GenMult, Simple){
     ASSERT_EQ(70, *m3.get(1, 2));
 }
 
+
+TEST(GenDotMat, Simple){
+    SparseMatrix<int> m1 = SparseMatrix<int>(2, 3);
+    m1.add(0, 0, 4);
+    m1.add(0, 2, 5);
+    m1.add(1, 1, 6);
+    m1.add(1, 2, 7);
+
+    SparseVector<int> v1 = SparseVector<int>(3);
+
+    v1.push_back(0, 100);
+    v1.push_back(1, 10);
+    v1.push_back(2, 1);
+
+    SparseVector<int> v2 = m1.GenDotMat(v1, &Multiply, &Add, 0);
+
+    ASSERT_EQ(405, *v2.get(0));
+    ASSERT_EQ(67, *v2.get(1));
+}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
