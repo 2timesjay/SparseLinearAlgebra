@@ -114,7 +114,7 @@ TEST(GenDot, Simple){
 
     // Min-Plus semiring dot product
     int mpresult = c.GenDot(d,
-                            [](int a, int b) { return a + b; },
+                            [](int& a, int& b) { return a + b; },
                             [](int a, int b) { return min(a, b); },
                             INT32_MAX);
     ASSERT_EQ(6, mpresult);

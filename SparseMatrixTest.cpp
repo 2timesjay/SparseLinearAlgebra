@@ -84,7 +84,7 @@ TEST(GenMult, Simple){
     m2.add(1, 0, 10);
     m2.add(1, 2, 10);
 
-    SparseMatrix<int> m3 = m1.GenMultMat(m2, [](int a, int b) { return a * b; });
+    SparseMatrix<int> m3 = m1.GenMultMat(m2, [](int& a, int& b) { return a * b; });
 
     ASSERT_EQ(40, *m3.get(0, 0));
     ASSERT_EQ(50, *m3.get(0, 2));

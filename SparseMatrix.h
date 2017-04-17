@@ -15,6 +15,37 @@ using namespace std;
 #include "SparseVector.h"
 
 template <class T>
+class OperatorHelper {
+public:
+    T (*mult)(T&, T&);
+    T (*add)(T&, T&);
+
+    OperatorHelper<T> ();
+
+    void SetMult(T (*multfn)(T&, T&));
+//    void SetAdd(T (*addfn)(T&, T&));
+    SparseVector<T> GenMultVec(SparseVector<T>& a, SparseVector<T>& b);
+};
+
+template <class T>
+inline
+OperatorHelper<T>::OperatorHelper(){
+}
+
+template <class T>
+inline
+void OperatorHelper<T>::SetMult(T (*multfn)(T&, T&)){
+    mult = multfn;
+}
+
+
+template <class T>
+inline
+SparseVector<T> OperatorHelper<T>::GenMultVec(SparseVector<T>& a, SparseVector<T>& b) {
+    return a.GenMult(b, mult);
+}
+
+template <class T>
 class SparseMatrix {
 public:
     int rows;
@@ -29,7 +60,7 @@ public:
     void add_row(int r, SparseVector<T> v);
     SparseMatrix<T> Transpose();
     SparseMatrix<T> GenAddMat(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>));
-    SparseMatrix<T> GenMultMat(SparseMatrix<T> other, T (*mult)(T, T));
+    SparseMatrix<T> GenMultMat(SparseMatrix<T> other, T (*mult)(T&, T&));
 };
 
 template <class T>
@@ -40,21 +71,21 @@ SparseVector<T> AddElements(SparseVector<T> a, SparseVector<T> b) {
 
 template <class T>
 inline
-SparseVector<T> MultiplyElements(SparseVector<T> a, SparseVector<T> b) {
+SparseVector<T> MultiplyElements(SparseVector<T>& a, SparseVector<T>& b) {
     return a.GenMult(b, &Multiply);
 }
 
 template <class T>
 inline
-SparseVector<T> GenMultiplyElements(T (*mult)(T, T), SparseVector<T> a, SparseVector<T> b) {
+SparseVector<T> GenMultiplyElements(T (*mult)(T&, T&), SparseVector<T> a, SparseVector<T> b) {
     return a.GenMult(b, mult);
 }
 
-template <class T>
-inline
-function<SparseVector<T>(SparseVector<T>, SparseVector<T>)> GenMultiplyElementsFunc() {
-    return [](SparseVector<T> a, SparseVector<T> b){ return MultiplyElements<T>(a, b); };
-}
+//template <class T>
+//inline
+//function<SparseVector<T>(SparseVector<T>& a, SparseVector<T>& b)> GenMultiplyElementsFunc(T (*mult)(T&, T&)) {
+//    return [mult](SparseVector<T>& a, SparseVector<T>& b){ return GenMultiplyElements<T>(mult, a, b); };
+//}
 
 template <class T>
 inline
@@ -121,46 +152,75 @@ SparseMatrix<T> SparseMatrix<T>::GenAddMat(SparseMatrix<T> other, SparseVector<T
 
 template <class T>
 inline
-SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, T (*mult)(T, T)){
-    cout << "Elem Mult: " << endl;
+SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, T (*mult)(T&, T&)){
     SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
 
+    function<SparseVector<T>(SparseVector<T>& a, SparseVector<T>& b)> mult_vectorized = [mult](SparseVector<T>& a, SparseVector<T>&b)->SparseVector<T> {
+        return a.GenMult(b, mult);
+    };
+    mt.row_list = row_list.GenMult(other.row_list, mult_vectorized);
+
+    // --- Methods that work ---
 //    mt.row_list = row_list.GenMult(other.row_list,
 //                                   &MultiplyElements);
 
-    mt.row_list = row_list.GenMult(other.row_list,
-                                   [](SparseVector<T> a, SparseVector<T> b)->SparseVector<T>{
-                                       cout << "Sparse Vector Lambda" << endl;
-                                       cout << a.size << endl;
-                                       cout << b.size << endl;
-                                       cout << *a.get(0) * *b.get(0) << endl;
-                                       cout << "Sparse Vector Lambda" << endl;
-                                       SparseVector<T> c = MultiplyElements(a, b);
-                                       cout << "Sparse Vector Lambda" << endl;
-                                       cout << *c.get(0) << endl;
-                                       cout << "Sparse Vector Lambda" << endl;
-                                       return a.GenMult(b, &Multiply);
-                                   });
+//    mt.row_list = row_list.GenMult(other.row_list,
+//                                   [](SparseVector<T>& a, SparseVector<T>& b)->SparseVector<T>{
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       cout << a.size << endl;
+//                                       cout << b.size << endl;
+//                                       cout << *a.get(0) * *b.get(0) << endl;
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       SparseVector<T> c = MultiplyElements(a, b);
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       cout << *c.get(0) << endl;
+//                                       cout << "Sparse Vector Lambda" << endl;
+//                                       return a.GenMult(b, &Multiply);
+//                                   });
 
-//    auto fptr = [](SparseVector<T> a, SparseVector<T> b) {
+//    mt.row_list = row_list.GenMult(other.row_list,
+//                                   [](SparseVector<T>& a, SparseVector<T>& b){ return MultiplyElements(a, b); });
+
+//    auto fptr = [](SparseVector<T>& a, SparseVector<T>& b) {
 //        cout << "Sparse Vector Lambda" << endl;
-//        return a.GenMult(b, [](T ea, T eb) {return ea * eb;} );
+//        return a.GenMult(b, [](T& ea, T& eb) {return ea * eb;} );
 //    };
 //    mt.row_list = row_list.GenMult(other.row_list,
 //                                   fptr);
 
-//    mt.row_list = row_list.GenMult(other.row_list,
-//                                   [](SparseVector<T>& a, SparseVector<T>& b){ return MultiplyElements(a, b); });
+    // --- Still don't work below this line.
+
+//    auto func = GenMultiplyElementsFunc();
+//    typedef SparseVector<int> reducer(SparseVector<int>&, SparseVector<int>&);
+//    reducer* ptr_func = func.target<reducer>() ;
+//    mt.row_list = row_list.GenMult(other.row_list, ptr_func);
 
 //    using namespace std::placeholders;  // for _1, _2, _3...
 //    auto bound_mult = std::bind(&MultiplyElements<T>, _1, _2);
 //    mt.row_list = row_list.GenMult(other.row_list,
 //                                   &bound_mult);
 
-//    auto func = GenMultiplyElementsFunc<T>();
-//    typedef SparseVector<int> reducer(SparseVector<int>, SparseVector<int>);
-//    reducer* ptr_func = func.target<reducer>() ;
-//    mt.row_list = row_list.GenMult(other.row_list, ptr_func);
+//    auto fptr = [mult](SparseVector<T>& a, SparseVector<T>& b)->SparseVector<T> {
+//        return a.GenMult(b, mult);
+//    };
+//    mt.row_list = row_list.GenMult(other.row_list,
+//                                   [mult](SparseVector<T>& va, SparseVector<T>& vb)->SparseVector<T> {
+//                                       return va.GenMult(vb, mult);
+//                                   });
+
+//    auto fptr = GenMultiplyElementsFunc(mult);
+//    mt.row_list = row_list.GenMult(other.row_list, fptr);
+
+//    OperatorHelper<T> oh = OperatorHelper<T>();
+//    oh.SetMult(mult);
+//
+//    mt.row_list = row_list.GenMult(other.row_list, oh.GenMultVec);
+
+//    struct Functor
+//    {
+//        T operator()(T& a, T& b){ return mult(a, b); }
+//    };
+
     return mt;
 }
 
