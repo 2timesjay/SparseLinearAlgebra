@@ -48,6 +48,7 @@ public:
     T* get(int id);
     bool has(int id);
     void print_string();
+    void insert(int id, T val);
     void push_back(int id, T val);
 };
 
@@ -216,7 +217,21 @@ void SparseVector<T>::print_string() {
 
 template <class T>
 inline
+void SparseVector<T>::insert(int id, T val) {
+    IVIterator<T> it = iv_list.begin();
+    while(it->first < id && it != iv_list.end()){
+        it++;
+    }
+    iv_list.insert(it, IdVal<T>(id, val));
+}
+
+template <class T>
+inline
 void SparseVector<T>::push_back(int id, T val) {
+    int last_id = iv_list.end()->first;
+    if (id < last_id){
+        throw  "New id must be greater than any previous id.";
+    }
     iv_list.push_back(IdVal<T>(id, val));
 }
 

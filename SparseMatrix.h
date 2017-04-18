@@ -102,7 +102,7 @@ void SparseMatrix<T>::add(int r, int c, T val){
     }
     row = row_list.get(r);
     ++size;
-    row->push_back(c, val);
+    row->insert(c, val);
 }
 
 // TODO: Rewrite to use just T, T -> T lambdas and intelligently create the lambda for vector addition/multiplication.
@@ -138,7 +138,7 @@ SparseVector<T> SparseMatrix<T>::GenDotMat(SparseVector<T> other, Reducer<T> ele
     for (IVIterator<SparseVector<T>> row_it=row_list.iv_list.begin(); row_it != row_list.iv_list.end(); ++row_it) {
         int r = row_it->first;
         SparseVector<T> row = row_it->second;
-        result.push_back(r, row.GenDot(other, elemf, reducef, zero));
+        result.insert(r, row.GenDot(other, elemf, reducef, zero));
     }
     return result;
 }
@@ -153,7 +153,7 @@ T* SparseMatrix<T>::get(int r, int c){
 template <class T>
 inline
 void SparseMatrix<T>::add_row(int r, SparseVector<T> v){
-    row_list.push_back(r, v);
+    row_list.insert(r, v);
 }
 
 

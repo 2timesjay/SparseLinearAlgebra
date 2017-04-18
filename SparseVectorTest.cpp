@@ -5,6 +5,46 @@
 
 using namespace std;
 
+TEST(Insert, OutOfOrder) {
+    SparseVector<int> sv = SparseVector<int>(52);
+    sv.insert(4, 5);
+    sv.insert(11, 4);
+    sv.insert(24, 3);
+    sv.insert(8, 2);
+    sv.insert(30, 1);
+
+    IVIterator<int> iv_it = sv.iv_list.begin();
+    ASSERT_EQ(5, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(2, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(4, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(3, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(1, (*iv_it).second);
+}
+
+TEST(Insert, ReverseOrder) {
+    SparseVector<int> sv = SparseVector<int>(52);
+    sv.insert(30, 1);
+    sv.insert(24, 3);
+    sv.insert(11, 4);
+    sv.insert(8, 2);
+    sv.insert(4, 5);
+
+    IVIterator<int> iv_it = sv.iv_list.begin();
+    ASSERT_EQ(5, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(2, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(4, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(3, (*iv_it).second);
+    ++iv_it;
+    ASSERT_EQ(1, (*iv_it).second);
+}
+
 TEST(Add, DisjointIdLists) {
     SparseVector<int> c = SparseVector<int>(52);
     c.push_back(3, 5);
