@@ -28,9 +28,9 @@ public:
     void add(int r, int c, T val);
     void add_row(int r, SparseVector<T> v);
     SparseMatrix<T> Transpose();
-    SparseMatrix<T> GenAddMat(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>));
-    SparseMatrix<T> GenMultMat(SparseMatrix<T> other, T (*mult)(T&, T&));
-    SparseVector<T> GenDotMat(SparseVector<T> other, T (*elemf)(T&, T&), T (*reducef)(T, T), T zero);
+    SparseMatrix<T> GenAddMat(SparseMatrix<T> other, Reducer<T> add);
+    SparseMatrix<T> GenMultMat(SparseMatrix<T> other, Reducer<T> mult);
+    SparseVector<T> GenDotMat(SparseVector<T> other, Reducer<T> elemf, Reducer<T> reducef, T zero);
 };
 
 template <class T>
@@ -108,18 +108,22 @@ void SparseMatrix<T>::add(int r, int c, T val){
 // TODO: Rewrite to use just T, T -> T lambdas and intelligently create the lambda for vector addition/multiplication.
 template <class T>
 inline
-SparseMatrix<T> SparseMatrix<T>::GenAddMat(SparseMatrix<T> other, SparseVector<T> (*add)(SparseVector<T>, SparseVector<T>)){
+SparseMatrix<T> SparseMatrix<T>::GenAddMat(SparseMatrix<T> other, Reducer<T> add){
     SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
-    mt.row_list = row_list.GenAdd(other.row_list, *add);
+
+    Reducer<SparseVector<T>> add_vectorized = [add](SparseVector<T>& a, SparseVector<T>&b)->SparseVector<T> {
+        return a.GenAdd(b, add);
+    };
+    mt.row_list = row_list.GenAdd(other.row_list, add_vectorized);
     return mt;
 }
 
 template <class T>
 inline
-SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, T (*mult)(T&, T&)){
+SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, Reducer<T> mult){
     SparseMatrix<T> mt = SparseMatrix<T>(rows, cols);
 
-    function<SparseVector<T>(SparseVector<T>& a, SparseVector<T>& b)> mult_vectorized = [mult](SparseVector<T>& a, SparseVector<T>&b)->SparseVector<T> {
+    Reducer<SparseVector<T>> mult_vectorized = [mult](SparseVector<T>& a, SparseVector<T>&b)->SparseVector<T> {
         return a.GenMult(b, mult);
     };
     mt.row_list = row_list.GenMult(other.row_list, mult_vectorized);
@@ -129,7 +133,7 @@ SparseMatrix<T> SparseMatrix<T>::GenMultMat(SparseMatrix<T> other, T (*mult)(T&,
 //// TODO: Rewrite to use just T, T -> T lambdas and intelligently create the lambda for vector addition/multiplication.
 template <class T>
 inline
-SparseVector<T> SparseMatrix<T>::GenDotMat(SparseVector<T> other, T (*elemf)(T&, T&), T (*reducef)(T, T), T zero){
+SparseVector<T> SparseMatrix<T>::GenDotMat(SparseVector<T> other, Reducer<T> elemf, Reducer<T> reducef, T zero){
     SparseVector<T> result = SparseVector<T>(rows);
     for (IVIterator<SparseVector<T>> row_it=row_list.iv_list.begin(); row_it != row_list.iv_list.end(); ++row_it) {
         int r = row_it->first;

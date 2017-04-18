@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <functional>
 #include <list>
 #include "SparseVector.h"
 
@@ -60,7 +61,7 @@ TEST(GenMult, DisjointIdLists) {
     d.push_back(8, 2);
     d.push_back(30, 1);
 
-    SparseVector<int> e = c.GenMult(d, &Multiply);
+    SparseVector<int> e = c.GenMult(d, &Multiply<int>);
 
     IVIterator<int> iv_it = e.iv_list.begin();
     ASSERT_EQ(e.iv_list.end(), iv_it);
@@ -94,7 +95,7 @@ TEST(Reduce, Simple) {
     c.push_back(11, 4);
     c.push_back(24, 3);
 
-    int result = c.Reduce(&Add, 0);
+    int result = c.Reduce(&Add<int>, 0);
     ASSERT_EQ(12, result);
 }
 
@@ -109,7 +110,7 @@ TEST(GenDot, Simple){
     d.push_back(30, 1);
 
     // Add-Mult Product
-    int amresult = c.GenDot(d, &Multiply, &Add, 0);
+    int amresult = c.GenDot(d, &Multiply<int>, &Add<int>, 0);
     ASSERT_EQ(8, amresult);
 
     // Min-Plus semiring dot product

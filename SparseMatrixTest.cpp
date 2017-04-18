@@ -62,7 +62,7 @@ TEST(GenAddMat, Simple){
     m2.add(1, 0, 10);
     m2.add(1, 2, 10);
 
-    SparseMatrix<int> m3 = m1.GenAddMat(m2, &AddElements);
+    SparseMatrix<int> m3 = m1.GenAddMat(m2, &Add<int>);
 
     ASSERT_EQ(14, *m3.get(0, 0));
     ASSERT_EQ(15, *m3.get(0, 2));
@@ -105,7 +105,7 @@ TEST(GenDotMat, Simple){
     v1.push_back(1, 10);
     v1.push_back(2, 1);
 
-    SparseVector<int> v2 = m1.GenDotMat(v1, &Multiply, &Add, 0);
+    SparseVector<int> v2 = m1.GenDotMat(v1, &Multiply<int>, &Add<int>, 0);
 
     ASSERT_EQ(405, *v2.get(0));
     ASSERT_EQ(67, *v2.get(1));
